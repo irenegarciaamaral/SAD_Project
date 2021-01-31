@@ -1,0 +1,79 @@
+version: "3.9"
+services:
+  queue:
+    build: './Queue'
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    environment:
+    - ZMQ_PUB_ADDRESS=tcp://queuelb:3000
+    - ZMQ_WORK_BIND_ADDRESS=tcp://*:5000
+    - ZMQ_PUB_WORKER_ADDRESS=tcp://worker:3001
+    - ZMQ_FRONTEND_BIND_ADDRESS=tcp://*:3333
+  queue2:
+    build: './Queue'
+    ports:
+      - "3002:3002"
+      - "3003:3003"
+    environment:
+    - ZMQ_PUB_ADDRESS=tcp://queuelb:3002
+    - ZMQ_WORK_BIND_ADDRESS=tcp://*:5001
+    - ZMQ_PUB_WORKER_ADDRESS=tcp://worker:3003
+    - ZMQ_FRONTEND_BIND_ADDRESS=tcp://*:3334
+  queue3:
+    build: './Queue'
+    ports:
+      - "3004:3004"
+      - "3005:3005"
+    environment:
+    - ZMQ_PUB_ADDRESS=tcp://queuelb:3004
+    - ZMQ_WORK_BIND_ADDRESS=tcp://*:5002
+    - ZMQ_PUB_WORKER_ADDRESS=tcp://worker:3005
+    - ZMQ_FRONTEND_BIND_ADDRESS=tcp://*:3335
+  frontend:
+    build: './Frontend'
+    ports:
+      - "4000:4000"
+      - "4001:4001"
+    environment:
+    - ZMQ_BIND_ADDRESS=tcp://*:2222
+    - ZMQ_PUB_QUEUE_ADDRESS=tcp://queueendpoint:4001
+    - APPID=4000
+  worker:
+    build: './Worker'
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+      - "50002:5002"
+    environment:
+    - ZMQ_PUB_WORKER_ADDRESS=tcp://queue:5000
+    - ZMQ_PUB_WORKER_ADDRESS_Q2=tcp://queue2:5001
+    - ZMQ_PUB_WORKER_ADDRESS_Q3=tcp://queue3:5002
+    - ZMQ_QUEUE_BIND_ADDRESS=tcp://*:3001
+    - ZMQ_QUEUE_BIND_ADDRESS_Q2=tcp://*:3003  
+    - ZMQ_QUEUE_BIND_ADDRESS_Q3=tcp://*:3005
+  queuelb:
+    build: './QueueLB'
+    ports:
+     - "2222:2222"
+    environment:
+    - ZMQ_PUB_ADDRESS=tcp://frontend:2222
+    - ZMQ_BIND_ADDRESS_QUEUE1=tcp://*:3000
+    - ZMQ_BIND_ADDRESS_QUEUE2=tcp://*:3002
+    - ZMQ_BIND_ADDRESS_QUEUE3=tcp://*:3004
+  queueendpoint:
+    build: './QueueEndCon'
+    ports:
+     - "3333:3333"
+     - "3334:3334"
+     - "3335:3335"
+    environment:
+    - ZMQ_PUB_ADDRESS=tcp://queue:3333
+    - ZMQ_PUB_ADDRESS2=tcp://queue2:3334
+    - ZMQ_PUB_ADDRESS3=tcp://queue3:3335
+    - ZMQ_BIND_ADDRESS_Frontend=tcp://*:4001
+  database:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"

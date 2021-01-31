@@ -1,0 +1,15 @@
+{
+  "name": "queue-end-connector",
+  "version": "1.0.0",
+  "description": "",
+  "main": "queueEndCon.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node queueEndCon.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "zeromq": "^6.0.0-beta.5"
+  }
+}
